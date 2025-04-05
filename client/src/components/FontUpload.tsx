@@ -11,6 +11,7 @@ const FontUpload: React.FC<FontUploadProps> = ({ onFontUploaded }) => {
   const [uploadedFont, setUploadedFont] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   const validateTTF = (file: File): boolean => {
     return file && file.name.toLowerCase().endsWith(".ttf");
@@ -59,8 +60,23 @@ const FontUpload: React.FC<FontUploadProps> = ({ onFontUploaded }) => {
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) handleFile(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,14 +91,30 @@ const FontUpload: React.FC<FontUploadProps> = ({ onFontUploaded }) => {
       </h3>
 
       <div
-        className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer bg-gray-50 hover:bg-gray-100 transition-all duration-300 flex flex-col items-center"
+        className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300 flex flex-col items-center ${
+          isDragging
+            ? "border-blue-500 bg-blue-50"
+            : "border-gray-300 bg-gray-50 hover:bg-gray-100"
+        }`}
         onClick={() => fileInputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <FiUploadCloud className="text-gray-400 text-6xl mb-4" />
-        <p className="text-lg font-medium text-gray-600">
-          Click to upload or drag and drop
+        <FiUploadCloud
+          className={`text-6xl mb-4 ${
+            isDragging ? "text-blue-500" : "text-gray-400"
+          }`}
+        />
+        <p
+          className={`text-lg font-medium ${
+            isDragging ? "text-blue-600" : "text-gray-600"
+          }`}
+        >
+          {isDragging
+            ? "Release to upload file"
+            : "Click to upload or drag and drop"}
         </p>
         <p className="text-sm text-gray-400 mt-2">Only TTF File Allowed</p>
       </div>
