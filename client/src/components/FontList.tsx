@@ -114,7 +114,8 @@ const FontList: React.FC<FontListProps> = ({
     <div className="mt-8">
       <style>{createFontFaces()}</style>
 
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">Your Fonts</h3>
+      <h3 className="text-2xl font-bold text-gray-800 ">Our Fonts</h3>
+      <p className="mb-6 text-gray-600">Browse a list of zepto fonts to build your font group</p>
 
       {loading && <p className="text-gray-500">Loading fonts...</p>}
 
