@@ -169,18 +169,9 @@ const FontGroupForm: React.FC<FontGroupFormProps> = ({ onGroupCreated }) => {
         </div>
 
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h4 className="text-lg font-medium text-gray-700">
-              Font Selection
-            </h4>
-            <button
-              type="button"
-              onClick={handleAddRow}
-              className="flex items-center text-indigo-600 hover:text-indigo-800"
-            >
-              <FiPlus className="mr-1" /> Add Row
-            </button>
-          </div>
+          <h4 className="text-lg font-medium text-gray-700 mb-4">
+            Font Selection
+          </h4>
 
           <div className="space-y-3">
             {fontRows.map((row) => (
@@ -237,13 +228,21 @@ const FontGroupForm: React.FC<FontGroupFormProps> = ({ onGroupCreated }) => {
           </div>
         )}
 
-        <div className="text-center">
+        <div className="flex justify-between items-center mt-6">
+          <button
+            type="button"
+            onClick={handleAddRow}
+            className="flex items-center px-4 py-2 border border-indigo-500 text-indigo-600 rounded-lg hover:bg-indigo-50"
+          >
+            <FiPlus className="mr-1" /> Add Row
+          </button>
+
           <button
             type="submit"
             disabled={loading}
             className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors disabled:bg-indigo-300"
           >
-            {loading ? "Creating..." : "Create Font Group"}
+            {loading ? "Creating..." : "Create"}
           </button>
         </div>
       </form>
