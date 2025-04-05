@@ -12,13 +12,11 @@ interface Font {
 
 interface FontListProps {
   onFontDeleted?: () => void;
-  onFontUploaded?: (font: Font) => void;
   refreshTrigger?: number;
 }
 
 const FontList: React.FC<FontListProps> = ({
   onFontDeleted,
-  onFontUploaded,
   refreshTrigger = 0,
 }) => {
   const [fonts, setFonts] = useState<Font[]>([]);
