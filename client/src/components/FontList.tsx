@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import api from "../api";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface Font {
   name: string;
@@ -23,6 +24,9 @@ const FontList: React.FC<FontListProps> = ({
   const [fonts, setFonts] = useState<Font[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] =
+    useState<boolean>(false);
+  const [fontToDelete, setFontToDelete] = useState<Font | null>(null);
 
   const createFontFaces = () => {
     return fonts
@@ -60,15 +64,18 @@ const FontList: React.FC<FontListProps> = ({
     }
   };
 
-  const handleDelete = async (font: Font) => {
-    if (!confirm(`Are you sure you want to delete ${font.name}?`)) {
-      return;
-    }
+  const handleDeleteClick = (font: Font) => {
+    setFontToDelete(font);
+    setIsConfirmDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!fontToDelete) return;
 
     try {
       const response = await api.post(
         "/delete-font.php",
-        { filename: font.name },
+        { filename: fontToDelete.name },
         {
           headers: {
             "Content-Type": "application/json",
@@ -77,7 +84,9 @@ const FontList: React.FC<FontListProps> = ({
       );
 
       if (response.data.success) {
-        setFonts((prevFonts) => prevFonts.filter((f) => f.name !== font.name));
+        setFonts((prevFonts) =>
+          prevFonts.filter((f) => f.name !== fontToDelete.name)
+        );
 
         if (onFontDeleted) {
           onFontDeleted();
@@ -88,7 +97,16 @@ const FontList: React.FC<FontListProps> = ({
     } catch (err) {
       console.error("Error deleting font:", err);
       setError("Failed to delete font. Please try again.");
+    } finally {
+      // Close the dialog after operation completes
+      setIsConfirmDialogOpen(false);
+      setFontToDelete(null);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmDialogOpen(false);
+    setFontToDelete(null);
   };
 
   useEffect(() => {
@@ -129,7 +147,7 @@ const FontList: React.FC<FontListProps> = ({
                 </div>
               </div>
               <button
-                onClick={() => handleDelete(font)}
+                onClick={() => handleDeleteClick(font)}
                 className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
                 title="Delete font"
               >
@@ -139,6 +157,17 @@ const FontList: React.FC<FontListProps> = ({
           );
         })}
       </div>
+
+      <ConfirmDialog
+        isOpen={isConfirmDialogOpen}
+        message={
+          fontToDelete
+            ? `Are you sure you want to delete ${fontToDelete.name}?`
+            : ""
+        }
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };
