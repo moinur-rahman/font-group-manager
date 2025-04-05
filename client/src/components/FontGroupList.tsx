@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
+import { FiTrash2 } from "react-icons/fi";
 import api from "../api";
 import ConfirmDialog from "./ConfirmDialog";
 
@@ -123,8 +123,8 @@ const FontGroupList: React.FC<FontGroupListProps> = ({
     <div>
       <style>{createFontFaces()}</style>
 
-      <h3 className="text-2xl font-bold text-gray-800 mb-2">Font Groups</h3>
-      <p className="mb-6 text-gray-600">Manage your custom font groups</p>
+      <h3 className="text-2xl font-bold text-gray-800 mb-2">Our Font Groups</h3>
+      <p className="mb-6 text-gray-600">List of all available font groups</p>
 
       {loading && <p className="text-gray-500">Loading font groups...</p>}
 
