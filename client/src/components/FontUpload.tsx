@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { FiUploadCloud } from "react-icons/fi";
+import api from "../api";
 
 const FontUpload: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -14,12 +15,8 @@ const FontUpload: React.FC = () => {
   const uploadToServer = async (formData: FormData) => {
     try {
       setIsUploading(true);
-      const response = await fetch("http://localhost/server/upload-font.php", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
+      const response = await api.post("/upload-font.php", formData);
+      const result = response.data;
 
       if (result.success) {
         setUploadedFont(result.data.name);
