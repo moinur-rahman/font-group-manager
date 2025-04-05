@@ -6,7 +6,7 @@ class Font
     
     public function __construct()
     {
-        $this->fontDir = dirname(__DIR__) . '/fonts/';
+        $this->fontDir = dirname(__DIR__) . '/uploads/';
         
         if (!is_dir($this->fontDir)) {
             mkdir($this->fontDir, 0755, true);
@@ -47,7 +47,7 @@ class Font
             return [
                 'name' => $file['name'],
                 'filename' => $filename,
-                'path' => '/fonts/' . $filename,
+                'path' => '/uploads/' . $filename,
                 'uploadedAt' => date('Y-m-d H:i:s')
             ];
         } else {
@@ -66,7 +66,7 @@ class Font
                 $filename = basename($file);
                 $fonts[] = [
                     'name' => $filename,
-                    'path' => '/fonts/' . $filename,
+                    'path' => '/uploads/' . $filename,
                     'uploadedAt' => date('Y-m-d H:i:s', filemtime($file))
                 ];
             }

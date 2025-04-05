@@ -14,8 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 define('BASE_PATH', dirname(__DIR__));
-define('FONTS_PATH', BASE_PATH . '/fonts/');
+define('UPLOADS_PATH', BASE_PATH . '/uploads/');
 
-if (!is_dir(FONTS_PATH)) {
-    mkdir(FONTS_PATH, 0755, true);
+if (!is_dir(UPLOADS_PATH)) {
+    mkdir(UPLOADS_PATH, 0755, true);
 }
