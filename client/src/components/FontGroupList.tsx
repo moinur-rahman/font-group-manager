@@ -1,28 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiEdit } from "react-icons/fi";
 import api from "../api";
 import ConfirmDialog from "./ConfirmDialog";
-
-interface FontRow {
-  id?: string;
-  name: string;
-  fontFile: string;
-}
-
-interface FontGroup {
-  id: string;
-  title: string;
-  fonts: FontRow[];
-  createdAt: string;
-  updatedAt?: string;
-}
+import { FontGroup } from "../types";
 
 interface FontGroupListProps {
   refreshTrigger?: number;
+  onEditGroup?: (group: FontGroup) => void;
 }
 
 const FontGroupList: React.FC<FontGroupListProps> = ({
   refreshTrigger = 0,
+  onEditGroup,
 }) => {
   const [fontGroups, setFontGroups] = useState<FontGroup[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -84,6 +73,12 @@ const FontGroupList: React.FC<FontGroupListProps> = ({
     setIsConfirmDialogOpen(true);
   };
 
+  const handleEditClick = (group: FontGroup) => {
+    if (onEditGroup) {
+      onEditGroup(group);
+    }
+  };
+
   const handleConfirmDelete = async () => {
     if (!groupToDelete) return;
 
@@ -123,8 +118,8 @@ const FontGroupList: React.FC<FontGroupListProps> = ({
     <div>
       <style>{createFontFaces()}</style>
 
-      <h3 className="text-2xl font-bold text-gray-800 mb-2">Our Font Groups</h3>
-      <p className="mb-6 text-gray-600">List of all available font groups</p>
+      <h3 className="text-2xl font-bold text-gray-800 mb-2">Font Groups</h3>
+      <p className="mb-6 text-gray-600">Manage your font groups</p>
 
       {loading && <p className="text-gray-500">Loading font groups...</p>}
 
@@ -138,59 +133,73 @@ const FontGroupList: React.FC<FontGroupListProps> = ({
         <p className="text-gray-500 italic">No font groups created yet.</p>
       )}
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {fontGroups.map((group) => (
-          <div
-            key={group.id}
-            className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm"
-          >
-            <div className="flex justify-between items-start mb-4">
-              <h4 className="text-xl font-bold text-gray-800">{group.title}</h4>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleDeleteClick(group)}
-                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
-                  title="Delete group"
+      {fontGroups.length > 0 && !loading && (
+        <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  <FiTrash2 />
-                </button>
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <h5 className="text-sm font-medium text-gray-500 mb-2">
-                FONTS IN THIS GROUP
-              </h5>
-              <div className="space-y-3">
-                {group.fonts.map((font, fontIndex) => {
-                  const fontFamily = font.fontFile.replace(/\.[^/.]+$/, "");
-
-                  return (
-                    <div
-                      key={fontIndex}
-                      className="flex justify-between items-center"
-                    >
-                      <span className="text-gray-700">{font.name}</span>
-                      <span
-                        className="text-lg"
-                        style={{ fontFamily: fontFamily }}
+                  Name
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Fonts
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Count
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {fontGroups.map((group) => (
+                <tr key={group.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                    {group.title}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis">
+                    {group.fonts.map((font) => font.name).join(", ")}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {group.fonts.length}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                    <div className="flex justify-center space-x-2">
+                      <button
+                        onClick={() => handleEditClick(group)}
+                        className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors"
+                        title="Edit group"
                       >
-                        Sample Text
-                      </span>
+                        <FiEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(group)}
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                        title="Delete group"
+                      >
+                        <FiTrash2 />
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="text-xs text-gray-500 text-right">
-              Created: {new Date(group.createdAt).toLocaleDateString()}
-              {group.updatedAt &&
-                ` • Updated: ${new Date(group.updatedAt).toLocaleDateString()}`}
-            </div>
-          </div>
-        ))}
-      </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <ConfirmDialog
         isOpen={isConfirmDialogOpen}

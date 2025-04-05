@@ -1,37 +1,50 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiX } from "react-icons/fi";
 import api from "../api";
-
-interface Font {
-  name: string;
-  path: string;
-  filename?: string;
-  uploadedAt: string;
-}
-
-interface FontRowData {
-  id: string;
-  name: string;
-  fontFile: string;
-}
+import { Font, FontGroup, FontRow } from "../types";
 
 interface FontGroupFormProps {
   onGroupCreated: () => void;
+  editingGroup?: FontGroup | null;
+  onEditComplete?: () => void;
 }
 
-const FontGroupForm: React.FC<FontGroupFormProps> = ({ onGroupCreated }) => {
+const FontGroupForm: React.FC<FontGroupFormProps> = ({
+  onGroupCreated,
+  editingGroup = null,
+  onEditComplete,
+}) => {
   const [availableFonts, setAvailableFonts] = useState<Font[]>([]);
   const [groupTitle, setGroupTitle] = useState<string>("");
-  const [fontRows, setFontRows] = useState<FontRowData[]>([
+  const [fontRows, setFontRows] = useState<FontRow[]>([
     { id: crypto.randomUUID(), name: "", fontFile: "" },
   ]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
 
   useEffect(() => {
     fetchFonts();
   }, []);
+
+  useEffect(() => {
+    if (editingGroup) {
+      setGroupTitle(editingGroup.title);
+
+      const fontsCopy = editingGroup.fonts.map((font) => ({
+        id: font.id || crypto.randomUUID(),
+        name: font.name,
+        fontFile: font.fontFile,
+      }));
+
+      setFontRows(fontsCopy);
+      setIsEditMode(true);
+    } else {
+      resetForm();
+      setIsEditMode(false);
+    }
+  }, [editingGroup]);
 
   const fetchFonts = async () => {
     try {
@@ -45,6 +58,13 @@ const FontGroupForm: React.FC<FontGroupFormProps> = ({ onGroupCreated }) => {
       console.error("Error fetching fonts:", err);
       setError("Failed to fetch fonts. Please try again.");
     }
+  };
+
+  const resetForm = () => {
+    setGroupTitle("");
+    setFontRows([{ id: crypto.randomUUID(), name: "", fontFile: "" }]);
+    setError("");
+    setSuccess("");
   };
 
   const handleAddRow = () => {
@@ -112,42 +132,79 @@ const FontGroupForm: React.FC<FontGroupFormProps> = ({ onGroupCreated }) => {
     try {
       setLoading(true);
 
-      const response = await api.post(
-        "/create-font-group.php",
-        {
-          title: groupTitle,
-          fonts: fontRows,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
+      if (isEditMode && editingGroup) {
+        const response = await api.post(
+          "/update-font-group.php",
+          {
+            id: editingGroup.id,
+            title: groupTitle,
+            fonts: fontRows,
           },
-        }
-      );
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      if (response.data.success) {
-        setSuccess("Font group created successfully!");
-        setGroupTitle("");
-        setFontRows([{ id: crypto.randomUUID(), name: "", fontFile: "" }]);
-
-        if (onGroupCreated) {
-          onGroupCreated();
+        if (response.data.success) {
+          setSuccess("Font group updated successfully!");
+          if (onEditComplete) {
+            onEditComplete();
+          }
+          resetForm();
+        } else {
+          setError(response.data.message || "Failed to update font group");
         }
       } else {
-        setError(response.data.message || "Failed to create font group");
+        const response = await api.post(
+          "/create-font-group.php",
+          {
+            title: groupTitle,
+            fonts: fontRows,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.data.success) {
+          setSuccess("Font group created successfully!");
+          resetForm();
+
+          if (onGroupCreated) {
+            onGroupCreated();
+          }
+        } else {
+          setError(response.data.message || "Failed to create font group");
+        }
       }
     } catch (err) {
-      console.error("Error creating font group:", err);
-      setError("Failed to create font group. Please try again.");
+      console.error("Error with font group operation:", err);
+      setError(
+        `Failed to ${
+          isEditMode ? "update" : "create"
+        } font group. Please try again.`
+      );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    resetForm();
+    setIsEditMode(false);
+    if (onEditComplete) {
+      onEditComplete();
     }
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
       <h3 className="text-2xl font-bold text-gray-800 mb-4">
-        Create Font Group
+        {isEditMode ? "Edit Font Group" : "Create Font Group"}
       </h3>
 
       <form onSubmit={handleSubmit}>
@@ -229,21 +286,40 @@ const FontGroupForm: React.FC<FontGroupFormProps> = ({ onGroupCreated }) => {
         )}
 
         <div className="flex justify-between items-center mt-6">
-          <button
-            type="button"
-            onClick={handleAddRow}
-            className="flex items-center px-4 py-2 border border-indigo-500 text-indigo-600 rounded-lg hover:bg-indigo-50"
-          >
-            <FiPlus className="mr-1" /> Add Row
-          </button>
+          <div>
+            <button
+              type="button"
+              onClick={handleAddRow}
+              className="flex items-center px-4 py-2 border border-indigo-500 text-indigo-600 rounded-lg hover:bg-indigo-50"
+            >
+              <FiPlus className="mr-1" /> Add Row
+            </button>
+          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors disabled:bg-indigo-300"
-          >
-            {loading ? "Creating..." : "Create"}
-          </button>
+          <div className="space-x-3">
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors disabled:bg-indigo-300"
+            >
+              {loading
+                ? isEditMode
+                  ? "Updating..."
+                  : "Creating..."
+                : isEditMode
+                ? "Update"
+                : "Create"}
+            </button>
+          </div>
         </div>
       </form>
     </div>
