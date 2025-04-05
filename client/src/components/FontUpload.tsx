@@ -103,12 +103,12 @@ const FontUpload: React.FC<FontUploadProps> = ({ onFontUploaded }) => {
         onDrop={handleDrop}
       >
         <FiUploadCloud
-          className={`text-6xl mb-4 ${
+          className={`text-6xl mb-4 pointer-events-none ${
             isDragging ? "text-blue-500" : "text-gray-400"
           }`}
         />
         <p
-          className={`text-lg font-medium ${
+          className={`text-lg font-medium pointer-events-none ${
             isDragging ? "text-blue-600" : "text-gray-600"
           }`}
         >
@@ -116,7 +116,9 @@ const FontUpload: React.FC<FontUploadProps> = ({ onFontUploaded }) => {
             ? "Release to upload file"
             : "Click to upload or drag and drop"}
         </p>
-        <p className="text-sm text-gray-400 mt-2">Only TTF File Allowed</p>
+        <p className="text-sm text-gray-400 mt-2 pointer-events-none">
+          Only TTF File Allowed
+        </p>
       </div>
 
       <input
