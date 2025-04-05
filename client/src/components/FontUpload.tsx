@@ -2,7 +2,11 @@ import React, { useRef, useState } from "react";
 import { FiUploadCloud } from "react-icons/fi";
 import api from "../api";
 
-const FontUpload: React.FC = () => {
+interface FontUploadProps {
+  onFontUploaded?: () => void;
+}
+
+const FontUpload: React.FC<FontUploadProps> = ({ onFontUploaded }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFont, setUploadedFont] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
@@ -21,6 +25,10 @@ const FontUpload: React.FC = () => {
       if (result.success) {
         setUploadedFont(result.data.name);
         setError("");
+
+        if (onFontUploaded) {
+          onFontUploaded();
+        }
       } else {
         setUploadedFont(null);
         setError(result.message || "Upload failed");

@@ -55,6 +55,20 @@ class Font
         }
     }
     
+    public function deleteFont($filename)
+    {
+        $filepath = $this->fontDir . $filename;
+        
+        if (file_exists($filepath)) {
+            if (unlink($filepath)) {
+                return true;
+            }
+            return 'Failed to delete the font file.';
+        }
+        
+        return 'Font file not found.';
+    }
+    
     public function getAllFonts()
     {
         $fonts = [];
