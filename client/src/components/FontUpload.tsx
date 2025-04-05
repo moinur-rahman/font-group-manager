@@ -5,9 +5,36 @@ const FontUpload: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFont, setUploadedFont] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const validateTTF = (file: File): boolean => {
     return file && file.name.toLowerCase().endsWith(".ttf");
+  };
+
+  const uploadToServer = async (formData: FormData) => {
+    try {
+      setIsUploading(true);
+      const response = await fetch("http://localhost/server/upload-font.php", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setUploadedFont(result.data.name);
+        setError("");
+      } else {
+        setUploadedFont(null);
+        setError(result.message || "Upload failed");
+      }
+    } catch (err) {
+      console.error("Error uploading font:", err);
+      setError("Failed to upload font. Please try again.");
+      setUploadedFont(null);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleFile = (file: File) => {
@@ -18,7 +45,7 @@ const FontUpload: React.FC = () => {
       const formData = new FormData();
       formData.append("font", file);
 
-      console.log("Uploaded:", file.name);
+      uploadToServer(formData);
     } else {
       setUploadedFont(null);
       setError("Only .ttf files are allowed.");
@@ -63,7 +90,13 @@ const FontUpload: React.FC = () => {
         className="hidden"
       />
 
-      {uploadedFont && (
+      {isUploading && (
+        <div className="mt-5 p-3 bg-blue-50 border border-blue-200 rounded-lg text-center">
+          <p className="text-blue-600 font-medium">Uploading font...</p>
+        </div>
+      )}
+
+      {uploadedFont && !isUploading && (
         <div className="mt-5 p-3 bg-green-50 border border-green-200 rounded-lg text-center">
           <p className="text-green-600 font-medium">Uploaded: {uploadedFont}</p>
         </div>
