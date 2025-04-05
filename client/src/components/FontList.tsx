@@ -96,7 +96,6 @@ const FontList: React.FC<FontListProps> = ({
       console.error("Error deleting font:", err);
       setError("Failed to delete font. Please try again.");
     } finally {
-      // Close the dialog after operation completes
       setIsConfirmDialogOpen(false);
       setFontToDelete(null);
     }
@@ -129,32 +128,50 @@ const FontList: React.FC<FontListProps> = ({
         <p className="text-gray-500 italic">No fonts uploaded yet.</p>
       )}
 
-      <div className="grid grid-cols-1 gap-4">
-        {fonts.map((font, index) => {
-          const fontName = font.name.replace(/\.[^/.]+$/, "");
+      {fonts.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="text-left p-4 font-semibold text-gray-700">
+                  FONT NAME
+                </th>
+                <th className="text-left p-4 font-semibold text-gray-700">
+                  PREVIEW
+                </th>
+                <th className="w-20"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {fonts.map((font, index) => {
+                const fontName = font.name.replace(/\.[^/.]+$/, "");
 
-          return (
-            <div
-              key={index}
-              className="p-4 border rounded-lg bg-white shadow-sm flex items-center justify-between"
-            >
-              <div className="flex-1">
-                <h4 className="font-medium text-gray-800">{font.name}</h4>
-                <div className="mt-2 text-xl" style={{ fontFamily: fontName }}>
-                  Example Style
-                </div>
-              </div>
-              <button
-                onClick={() => handleDeleteClick(font)}
-                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
-                title="Delete font"
-              >
-                <FiTrash2 />
-              </button>
-            </div>
-          );
-        })}
-      </div>
+                return (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="p-4">
+                      <h4 className="font-medium text-gray-800">{font.name}</h4>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-xl" style={{ fontFamily: fontName }}>
+                        Example Style
+                      </div>
+                    </td>
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => handleDeleteClick(font)}
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+                        title="Delete font"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <ConfirmDialog
         isOpen={isConfirmDialogOpen}
