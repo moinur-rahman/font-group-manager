@@ -118,8 +118,8 @@ const FontGroupList: React.FC<FontGroupListProps> = ({
     <div>
       <style>{createFontFaces()}</style>
 
-      <h3 className="text-2xl font-bold text-gray-800 mb-2">Font Groups</h3>
-      <p className="mb-6 text-gray-600">Manage your font groups</p>
+      <h3 className="text-2xl font-bold text-gray-800 mb-2">Our Font Groups</h3>
+      <p className="mb-6 text-gray-600">List of all available font groups</p>
 
       {loading && <p className="text-gray-500">Loading font groups...</p>}
 
