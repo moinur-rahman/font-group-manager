@@ -75,7 +75,29 @@ font-group-manager/
 
 ### Development
 
-#### Frontend (React)
+#### Using Docker (Recommended)
+
+When using Docker, both frontend and backend development environments are already configured:
+
+```bash
+# Start the entire application stack
+docker-compose up -d
+
+# View logs from both services
+docker-compose logs -f
+
+# View logs from a specific service
+docker-compose logs -f client
+docker-compose logs -f server
+```
+
+Any changes to the code will automatically reload in both frontend and backend services, as the Docker configuration includes volume mounts that reflect changes immediately.
+
+#### Without Docker
+
+If you prefer to develop without Docker, you can run each part separately:
+
+##### Frontend (React)
 
 ```bash
 cd client
@@ -83,11 +105,17 @@ npm install
 npm run dev
 ```
 
-The development server will start at [http://localhost:3000](http://localhost:3000) with hot reload enabled.
+The React development server will start at [http://localhost:3000](http://localhost:3000) with hot reload enabled.
 
-#### Backend (PHP)
+##### Backend (PHP)
 
-The PHP server will automatically reload when files change if you're using the Docker setup.
+```bash
+cd server
+# You need PHP installed locally
+php -S localhost:5000
+```
+
+Note: When developing without Docker, you'll need to ensure all dependencies (Node.js, npm, PHP) are installed on your local machine.
 
 ## Usage Guide
 
@@ -117,4 +145,3 @@ The project includes a `docker-compose.yml` file with the following services:
 - **server**: PHP backend API (port 5000)
 
 All data is stored in mounted volumes to persist between container restarts.
-
